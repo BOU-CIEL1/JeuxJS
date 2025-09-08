@@ -41,4 +41,6 @@ exp.ws('/echo', function (ws, req) {
 var portServ = 80;
 exp.listen(portServ, function () {
     console.log('Serveur en ecoute');
-}); 
+});
+
+message = ws._socket._peername.address + ws._socket._peername.port + ' : ' + message;

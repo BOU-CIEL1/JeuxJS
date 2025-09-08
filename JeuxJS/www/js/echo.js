@@ -42,3 +42,21 @@ function TesterLaCompatibilite() {
     function BPEnvoyer() {
         ws.send(document.getElementById('messageEnvoi').value);
     }
+
+    /*  ****************** Broadcast clients WebSocket  **************   */
+    var aWss = expressWs.getWss('/echo');
+    var WebSocket = require('ws');
+    aWss.broadcast = function broadcast(data) {
+        console.log("Broadcast aux clients navigateur : %s", data);
+        aWss.clients.forEach(function each(client) {
+            if (client.readyState == WebSocket.OPEN) {
+                client.send(data, function ack(error) {
+                    console.log("    -  %s-%s", client._socket.remoteAddress,
+                        client._socket.remotePort);
+                    if (error) {
+                        console.log('ERREUR websocket broadcast : %s', error.toString());
+                    }
+                });
+            }
+        });
+    };
