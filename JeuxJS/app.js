@@ -26,6 +26,7 @@ exp.ws('/echo', function (ws, req) {
         req.connection.remoteAddress, req.connection.remotePort);
 
     ws.on('message', function (message) {
+        message = ws._socket._peername.address + ws._socket._peername.port + ' : ' + message;
         console.log('De %s %s, message :%s', req.connection.remoteAddress,
             req.connection.remotePort, message);
         ws.send(message);
@@ -43,4 +44,3 @@ exp.listen(portServ, function () {
     console.log('Serveur en ecoute');
 });
 
-message = ws._socket._peername.address + ws._socket._peername.port + ' : ' + message;
