@@ -32,6 +32,7 @@ class CQr {
             // nouvelle question après bonne réponse
             let nouvelle = this.NouvelleQuestion();
             wsClient.send(nouvelle);
+            var mess = JSON.parse(message); 
         } else {
             wsClient.send("Mauvaise réponse ❌ Essaye encore !");
         }
@@ -183,4 +184,9 @@ function TesterLaCompatibilite() {
 
     ws.on('message', jeuxQr.TraiterReponse.bind(jeuxQr, ws));
     var jeuxQr = new CQr();
+
+    ws.send(JSON.stringify({
+        nom: document.getElementById('nom').value,
+        reponse: document.getElementById('messageEnvoi').value
+    })); 
 
