@@ -1,6 +1,12 @@
 ﻿'use strict';
 
 console.log('TP CIEL');
+
+var Cjeuxqr = require('./jeuxqr.js');
+// instanciation du jeux QR 
+var jeuxQr = new Cjeuxqr;
+
+
 /*  *********************** Serveur Web ***************************   */
 // 
 var express = require('express');
@@ -43,4 +49,5 @@ var portServ = 80;
 exp.listen(portServ, function () {
     console.log('Serveur en ecoute');
 });
+
 

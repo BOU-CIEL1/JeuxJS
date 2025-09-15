@@ -1,45 +1,34 @@
-﻿var ipServeur = '172.17.50.125';     // Adresse ip du serveur  
+﻿node jeuxqr.js;
+var ipServeur = '172.17.50.125';     // Adresse ip du serveur
 var ws;                             // Variable pour l'instance de la WebSocket.
+const CQr = require('./jeuxqr.js');  // ./CQr sans extension .js est possible
 
-class CQr {
-    constructor() {
-        this.question = "?";
-        this.bonneReponse = null;
-        this.joueurs = new Array();
-    }
+const jeuxQr = new CQr();
 
-    var indexjoueur = this.joueurs.findIndex(function (j) {
-        return j.nom === mess.nom;
-    });
-    this.joueurs.push({
-    nom: mess.nom,
-    score: 0,
-    ws: wsClient
-    });
 
 // Envoyer a tous les joueurs un message comportant les resultats du jeu 
 EnvoyerResultatDiff() {
-        // Recopie des joueurs dans un autre tableau joueursSimple sans l'objet 
-WebSocket dans ws
+    // recopie des joueurs dans un autre tableau joueursSimple sans ws 
     var joueursSimple = new Array;
     this.joueurs.forEach(function each(joueur) {
         joueursSimple.push({
             nom: joueur.nom,
-            score: joueur.score,
+            score: joueur.score
         });
     });
-    // Composition du message a envoyer 
+
     var messagePourLesClients = {
         joueurs: joueursSimple,
         question: this.question
     };
-    // Diffusion (Broadcast) aux joueurs connectés; 
+
+    // broadcast aux joueurs connectés; 
     this.joueurs.forEach(function each(joueur) {
         if (joueur.ws != undefined) {
             joueur.ws.send(JSON.stringify(messagePourLesClients), function
                 ack(error) {
-                console.log('    -  %s-%s',
-                    joueur.ws._socket._peername.address, joueur.ws._socket._peername.port);
+                console.log('    -  %s-%s', joueur.ws._socket._peername.address,
+                    joueur.ws._socket._peername.port);
                 if (error) {
                     console.log('ERREUR websocket broadcast : %s',
                         error.toString());
@@ -47,8 +36,7 @@ WebSocket dans ws
             });
         }
     });
-} 
-};
+}
 
     // tire un entier aléatoire entre min et max inclus
     GetRandomInt(min, max) {
@@ -245,6 +233,30 @@ function TesterLaCompatibilite() {
         };
         aWss.broadcast(JSON.stringify(messagePourLesClients));
     }
+
+    var indexjoueur = this.joueurs.findIndex(function (j) {
+        return j.nom === mess.nom;
+    });
+    this.joueurs.push({
+        nom: mess.nom,
+        score: 0,
+        ws: wsClient
+    });
+
+    Deconnecter(ws) {
+        var indexjoueur = this.joueurs.findIndex(function (j) {
+            return j.ws === ws;
+        });
+        if (indexjoueur != -1) {
+            this.joueurs[indexjoueur].ws = undefined;
+        }
+    }
+
+    ws.on('close', function (reasonCode, description) {
+        //console.log('Deconnexion WebSocket %s sur le port %s', 
+        req.connection.remoteAddress, req.connection.remotePort);
+    jeuxQr.Deconnecter(ws);
+});
 
     document.getElementById('resultats').textContent = JSON.stringify(mess.joueurs); 
 
