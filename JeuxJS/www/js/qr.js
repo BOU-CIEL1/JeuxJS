@@ -100,5 +100,24 @@ function TesterLaCompatibilite() {
             return Math.floor(Math.random() * Math.floor(max));
         }
 
+        // Cette fonction affiche un message de validation ("Juste !" ou "Faux !") seulement à la personne qui a répondu, 
+        // dans la zone de question, puis efface ce message au bout de 3 secondes et affiche une nouvelle question.
+
+        function afficherValidation(estJuste) {
+            const questionZone = document.getElementById('question');
+            const ancienTexte = questionZone.innerHTML;
+            // Affiche le message de résultat
+            questionZone.innerHTML = estJuste ? "Juste !" : "Faux !";
+
+            // Après 3 secondes, efface le message et affiche une nouvelle question
+            setTimeout(function () {
+                questionZone.innerHTML = "Nouvelle question : ...";
+                // (Remplacer par le code pour générer la nouvelle question si besoin)
+            }, 3000);
+        }
+
+        // Exemple d'utilisation : appeler afficherValidation(true) ou afficherValidation(false) après une réponse.
+
+
     });
 
