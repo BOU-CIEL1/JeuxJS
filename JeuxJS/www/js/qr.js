@@ -117,12 +117,18 @@ function TesterLaCompatibilite() {
         });
 
 
-        function TraiterReponse(message) {
-            console.log('De %s %s, message :%s', req.connection.remoteAddress,
-                req.connection.remotePort, message);
-            if (message == bonneReponse) {
-                NouvelleQuestion();
+        function TraiterReponse(wsClient, message) {
+            var mess = JSON.parse(message);
+            if (mess.reponse == this.bonneReponse) {
+                this.question = "Bonne reponse de " + mess.nom;
             }
+            else {
+                this.question = "Mauvaise reponse de " + mess.nom;
+            }
+            this.EnvoyerResultatDiff();
+            setTimeout(() => {  //affichage de la question 3s après 
+                this.NouvelleQuestion();
+            }, 3000);
         }
 
 
@@ -188,5 +194,12 @@ function TesterLaCompatibilite() {
     ws.send(JSON.stringify({
         nom: document.getElementById('nom').value,
         reponse: document.getElementById('messageEnvoi').value
-    })); 
+    }));
+
+    EnvoyerResultatDiff() {
+        var messagePourLesClients = {
+            question: this.question
+        };
+        aWss.broadcast(JSON.stringify(messagePourLesClients));
+    } 
 
