@@ -1,5 +1,42 @@
-var ipServeur = '172.17.50.125';     // Adresse ip du serveur  
+﻿var ipServeur = '172.17.50.125';     // Adresse ip du serveur  
 var ws;                             // Variable pour l'instance de la WebSocket.
+
+class CQr {
+    constructor() {
+        this.question = "?";
+        this.bonneReponse = null;
+    }
+
+    // tire un entier aléatoire entre min et max inclus
+    GetRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // génère une nouvelle question de type : "binaire de 8 bits"
+    NouvelleQuestion() {
+        // tirer un entier 0..255
+        let n = this.GetRandomInt(0, 255);
+        // transformer en binaire 8 bits
+        let binaire = n.toString(2).padStart(8, '0');
+        // enregistrer
+        this.question = "Donne la valeur décimale du nombre binaire : " + binaire;
+        this.bonneReponse = n;
+        return this.question;
+    }
+
+    // traite une réponse envoyée par un client via WebSocket
+    TraiterReponse(wsClient, message) {
+        let reponse = parseInt(message);
+        if (reponse === this.bonneReponse) {
+            wsClient.send("Bonne réponse ! ✅");
+            // nouvelle question après bonne réponse
+            let nouvelle = this.NouvelleQuestion();
+            wsClient.send(nouvelle);
+        } else {
+            wsClient.send("Mauvaise réponse ❌ Essaye encore !");
+        }
+    }
+}
 
 window.onload = function () {
     if (TesterLaCompatibilite()) {
@@ -8,11 +45,11 @@ window.onload = function () {
     ControleIHM();
 }
 
-//Tester la compatibilit� entre WebSocket et le serveur Web
+//Tester la compatibilité entre WebSocket et le serveur Web
 function TesterLaCompatibilite() {
     let estCompatible = true;
     if (!('WebSocket' in window)) {
-        window.alert('WebSocket non support� par le navigateur');
+        window.alert('WebSocket non supporté par le navigateur');
         estCompatible = false;
     }
     return estCompatible;
@@ -64,7 +101,7 @@ function TesterLaCompatibilite() {
     var question = '?';
     var bonneReponse = 0;
 
-    // Connexion des clients a la WebSocket /qr et evenements associ�s 
+    // Connexion des clients a la WebSocket /qr et evenements associés 
     // Questions/reponses 
     exp.ws('/qr', function (ws, req) {
         console.log('Connection WebSocket %s sur le port %s',
@@ -100,24 +137,50 @@ function TesterLaCompatibilite() {
             return Math.floor(Math.random() * Math.floor(max));
         }
 
-        // Cette fonction affiche un message de validation ("Juste !" ou "Faux !") seulement � la personne qui a r�pondu, 
+        // Cette fonction affiche un message de validation ("Juste !" ou "Faux !") seulement à la personne qui a répondu, 
         // dans la zone de question, puis efface ce message au bout de 3 secondes et affiche une nouvelle question.
 
         function afficherValidation(estJuste) {
             const questionZone = document.getElementById('question');
             const ancienTexte = questionZone.innerHTML;
-            // Affiche le message de r�sultat
+            // Affiche le message de résultat
             questionZone.innerHTML = estJuste ? "Juste !" : "Faux !";
 
-            // Apr�s 3 secondes, efface le message et affiche une nouvelle question
+            // Après 3 secondes, efface le message et affiche une nouvelle question
             setTimeout(function () {
                 questionZone.innerHTML = "Nouvelle question : ...";
-                // (Remplacer par le code pour g�n�rer la nouvelle question si besoin)
+                // (Remplacer par le code pour générer la nouvelle question si besoin)
             }, 3000);
         }
 
-        // Exemple d'utilisation : appeler afficherValidation(true) ou afficherValidation(false) apr�s une r�ponse.
+        // Exemple d'utilisation : appeler afficherValidation(true) ou afficherValidation(false) après une réponse.
 
 
     });
+
+    /* ********** serveur WebSocket express /qr ********** */
+
+    exp.ws('/qr', function (ws, req) {
+        console.log('Connexion WebSocket %s:%s',
+            req.connection.remoteAddress, req.connection.remotePort);
+
+        // Envoie une première question
+        let q = jeuxQr.NouvelleQuestion();
+        ws.send(q);
+
+        // Callback intermédiaire
+        function TMessage(message) {
+            jeuxQr.TraiterReponse(ws, message);
+        }
+
+        ws.on('message', TMessage);
+
+        ws.on('close', function (reasonCode, description) {
+            console.log('Déconnexion %s:%s',
+                req.connection.remoteAddress, req.connection.remotePort);
+        });
+    });
+
+    ws.on('message', jeuxQr.TraiterReponse.bind(jeuxQr, ws));
+    var jeuxQr = new CQr();
 
